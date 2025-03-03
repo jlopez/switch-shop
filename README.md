@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Switch Shop
+
+A simple HTTP server built with Next.js and Bun to serve files from a library directory.
+
+## Features
+
+- **File Listing**: Browse all files in the library at `/shop`
+- **File Downloads**: Download files by clicking on them
+- **Clean Interface**: User-friendly display with file sizes and parent directories
+- **Configurable**: Set library path and server port via environment variables
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- [Bun](https://bun.sh/) installed on your system
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   bun install
+   ```
+
+### Configuration
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+# Path to the library directory
+SHOP_PATH=/path/to/your/library
+
+# Port for the HTTP server (default: 3000)
+SHOP_PORT=3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running the Server
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Development mode:
+```
+bun run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Production build:
+```
+bun run build
+bun run start
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app/shop/page.tsx`: Main page component for the file listing
+- `src/app/shop/[name]/route.ts`: API route for file downloads
+- `src/components/dir-list.tsx`: Client component for rendering the file list
+- `src/lib/fileSystem.ts`: Server-side utilities for file system operations
+- `src/lib/types.ts`: Type definitions
+- `src/lib/utils.ts`: Utility functions for formatting and content types
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How It Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. The server scans the configured library directory for files
+2. Files are displayed in a clean list with their sizes and parent directories
+3. Clicking on a file initiates a download
+4. The server handles errors with appropriate HTTP status codes
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
