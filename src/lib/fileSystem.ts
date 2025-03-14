@@ -24,7 +24,7 @@ export async function scanLibrary(): Promise<LibraryFile[]> {
     try {
       await fs.access(libraryPath);
     } catch (error) {
-      console.error(`Library directory not found: ${libraryPath}`);
+      console.error(`Library directory not found: ${libraryPath}:`, error);
       return [];
     }
 
