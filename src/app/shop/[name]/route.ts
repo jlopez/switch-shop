@@ -73,7 +73,7 @@ async function handleFileDownload(fileName: string, sendBody: boolean = true): P
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
         'Content-Length': stats.size.toString(),
       },
     });
