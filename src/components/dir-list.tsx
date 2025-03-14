@@ -12,15 +12,36 @@ interface DirListProps {
  */
 function FileItem({ file }: { file: LibraryFile }) {
   return (
-    <li className="file-item">
-      <a href={`/shop/${encodeURIComponent(file.name)}`} className="file-link">
-        <span className="file-name">{file.displayName}</span>
-      </a>
-      <span className="file-info">
-        <span className="file-size">{formatFileSize(file.size)}</span>
-        <span className="file-parent">{file.parentDir}</span>
-      </span>
-    </li>
+    <tr>
+      <td><i className="icon icon-_page"></i></td>
+      <td className="perms"><code>(-rwxrwxrwx)</code></td>
+      <td className="last-modified">15-Oct-2024 13:37</td>
+      <td className="file-size"><code>{formatFileSize(file.size)}</code></td>
+      <td className="display-name">
+        <a href={`/shop/${encodeURIComponent(file.name)}`}>{file.displayName}</a>
+      </td>
+
+      <style jsx>{`
+        i.icon {
+          display: block;
+          height: 16px;
+          width: 16px;
+        }
+
+        td.file-size {
+          text-align: right;
+          padding-left: 1em;
+        }
+
+        td.display-name {
+          padding-left: 1em;
+        }
+
+        i.icon-_page {
+          background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmhJREFUeNpsUztv01AYPfdhOy/XTZ80VV1VoCqlA2zQqUgwMEErWBALv4GJDfEDmOEHsFTqVCTExAiiSI2QEKJKESVFFBWo04TESRzfy2c7LY/kLtf2d8+555zvM9NaI1ora5svby9OnbUEBxgDlIKiWjXQeLy19/X17sEtcPY2rtHS96/Hu0RvXXLz+cUzM87zShsI29DpHCYt4E6Box4IZzTnbDx7V74GjhOSfwgE0H2638K9h08A3iHGVbjTw7g6YmAyw/BgecHNGGJjvfQhIfmfIFDAXJpjuugi7djIFVI4P0plctgJQ0xnFe5eOO02OwEp2VkhSCnC8WOCdqgwnzFx4/IyppwRVN+XYXsecqZA1pB48ekAnw9/4GZx3L04N/GoTwEjX4cNH5vlPfjtAIYp8cWrQutxrC5Mod3VsXVTMFSqtaE+gl9dhaUxE2tXZiF7nYiiatJ3v5s8R/1yOCNLOuwjkELiTbmC9dJHpIaGASsDkoFQGJQwHWMcHWJYOmUj1OjvQotuytt5nHMLEGkCyx6QU384jwkUAd2sxJbS/QShZtg/8rHzzQOzSaFhxQrA6YgQMQHojCUlgnCAAvKFBoXXaHfArSCZDE0gyWJgFIKmvUFKO4MUNIk2a4+hODtDUVuJ/J732AKS6ZtImdTyAQQB3bZN8l9t75IFh0JMUdVKsohsUPqRgnka0tYgggYpCHkKGTsHI5NOMojB4iTICCepvX53AIEfQta1iUCmoTiBmdEri2RgddKFhuJoqb/af/yw/d3zTNM6UkaOfis62aUgddAbnz+rXuPY+Vnzjt9/CzAAbmLjCrfBiRgAAAAASUVORK5CYII=");
+        }
+      `}</style>
+    </tr>
   );
 }
 
@@ -29,74 +50,27 @@ function FileItem({ file }: { file: LibraryFile }) {
  */
 export default function DirList({ files }: DirListProps) {
   return (
-    <div className="shop-container">
-      <h1>Switch Shop</h1>
-
-      {files.length > 0 ? (
-        <ul className="file-list">
-          {files.map((file) => (
-            <FileItem key={file.path} file={file} />
-          ))}
-        </ul>
-      ) : (
-        <p className="empty-message">No files found in the library.</p>
-      )}
+    <div>
+      <h1>Index of /</h1>
+      <table>
+        <tbody>
+          {files.length > 0 ? (
+            files.map((file) => (
+              <FileItem key={file.path} file={file} />
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5}>No files found in the library.</td>
+            </tr>
+        )}
+        </tbody>
+      </table>
+      <br />
+      <address>Node.js v22.11.0/ <a href="https://github.com/jlopez/switch-shop">switch-shop</a> server running @ 192.168.0.91:3000</address>
 
       <style jsx>{`
-        .shop-container {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 2rem;
-          background-color: #f5f5f5;
-        }
-        h1 {
-          color: #333;
-          border-bottom: 2px solid #ddd;
-          padding-bottom: 0.5rem;
-        }
-        .file-list {
-          list-style: none;
-          padding: 0;
-        }
-        .file-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem;
-          margin-bottom: 0.5rem;
-          background-color: white;
-          border-radius: 4px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          transition: transform 0.2s ease;
-        }
-        .file-item:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-        }
-        .file-link {
-          color: #0066cc;
-          text-decoration: none;
-          font-weight: 500;
-        }
-        .file-link:hover {
-          text-decoration: underline;
-        }
-        .file-info {
-          display: flex;
-          gap: 1rem;
-          color: #666;
-          font-size: 0.9rem;
-        }
-        .file-parent {
-          background-color: #eee;
-          padding: 0.2rem 0.5rem;
-          border-radius: 3px;
-        }
-        .empty-message {
-          text-align: center;
-          padding: 2rem;
-          color: #666;
+        table tr {
+          white-space: nowrap;
         }
       `}</style>
     </div>
