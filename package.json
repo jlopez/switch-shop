@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0",
     "lint": "next lint",
-    "test": "bun test"
+    "test": "bun test --coverage --coverage-reporter lcov --coverage-reporter text --coverage-dir coverage --reporter junit --reporter-outfile coverage/junit.xml"
   },
   "dependencies": {
     "react": "^19.0.0",
