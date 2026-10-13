@@ -37,7 +37,14 @@ export async function scanLibrary(): Promise<LibraryFile[]> {
     // Scan each directory for files
     for (const dir of directories) {
       const dirPath = path.join(libraryPath, dir);
-      const dirDirents = await fs.readdir(dirPath, { withFileTypes: true });
+      let dirDirents;
+      try {
+        dirDirents = await fs.readdir(dirPath, { withFileTypes: true });
+      } catch (error) {
+        // A directory the share lists but will not open (8.3 ghost names, NFD/NFC mismatches) must not empty the whole shop
+        console.warn(`Skipping unreadable directory ${dirPath}:`, error);
+        continue;
+      }
 
       const dirFilePromises = dirDirents
         .filter(dirent => dirent.isFile())
