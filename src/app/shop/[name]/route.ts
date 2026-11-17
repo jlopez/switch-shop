@@ -14,8 +14,8 @@ import { LibraryFile } from '@/lib/types';
  * @param file The LibraryFile object containing path and name
  * @returns A ReadableStream that streams the file content
  */
-function createReadableStream(file: LibraryFile): ReadableStream {
-  const fileStream = createReadStream(file.path);
+function createReadableStream(file: LibraryFile, start?: number, end?: number): ReadableStream {
+  const fileStream = createReadStream(file.path, start === undefined ? undefined : { start, end });
 
   return new ReadableStream({
     start(controller) {
@@ -44,7 +44,7 @@ function createReadableStream(file: LibraryFile): ReadableStream {
  * @param sendBody Whether to include the file content in the response
  * @returns The response with the file content or headers only
  */
-async function handleFileDownload(fileName: string, sendBody: boolean = true): Promise<NextResponse> {
+async function handleFileDownload(fileName: string, sendBody: boolean = true, rangeHeader: string | null = null): Promise<NextResponse> {
   try {
     // Get the file information
     const file = await getFileByName(fileName);
@@ -65,6 +65,41 @@ async function handleFileDownload(fileName: string, sendBody: boolean = true): P
     // Get file stats for Content-Length
     const stats = await fs.stat(file.path);
 
+    const commonHeaders = {
+      'Content-Type': contentType,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+      'Accept-Ranges': 'bytes',
+    };
+
+    // Byte ranges: installers (DBI, Tinfoil) read NSP headers with Range requests and resume downloads with them.
+    // Only a single range "bytes=start-end", "bytes=start-" or "bytes=-suffix" is supported.
+    const range = rangeHeader ? /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim()) : null;
+    if (range && (range[1] !== '' || range[2] !== '')) {
+      let start: number;
+      let end: number;
+      if (range[1] === '') {
+        start = Math.max(0, stats.size - parseInt(range[2], 10));
+        end = stats.size - 1;
+      } else {
+        start = parseInt(range[1], 10);
+        end = range[2] === '' ? stats.size - 1 : Math.min(parseInt(range[2], 10), stats.size - 1);
+      }
+      if (start > end || start >= stats.size) {
+        return new NextResponse(null, {
+          status: 416,
+          headers: { 'Content-Range': `bytes */${stats.size}` },
+        });
+      }
+      return new NextResponse(sendBody ? createReadableStream(file, start, end) : null, {
+        status: 206,
+        headers: {
+          ...commonHeaders,
+          'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+          'Content-Length': (end - start + 1).toString(),
+        },
+      });
+    }
+
     // Create a ReadableStream from the file if sendBody is true
     const body = sendBody ? createReadableStream(file) : null;
 
@@ -72,8 +107,7 @@ async function handleFileDownload(fileName: string, sendBody: boolean = true): P
     return new NextResponse(body, {
       status: 200,
       headers: {
-        'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+        ...commonHeaders,
         'Content-Length': stats.size.toString(),
       },
     });
@@ -102,7 +136,7 @@ export async function GET(
 ): Promise<NextResponse> {
   // Await params before using its properties
   const { name: fileName } = await params;
-  return handleFileDownload(fileName, true);
+  return handleFileDownload(fileName, true, request.headers.get('range'));
 }
 
 /**
@@ -118,5 +152,5 @@ export async function HEAD(
 ): Promise<NextResponse> {
   // Await params before using its properties
   const { name: fileName } = await params;
-  return handleFileDownload(fileName, false);
+  return handleFileDownload(fileName, false, request.headers.get('range'));
 }

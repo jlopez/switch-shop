@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Canonical /shop/ with a trailing slash, so the Apache-style relative links resolve for DBI, Tinfoil and browsers alike
+  trailingSlash: true,
 };
 
 export default nextConfig;

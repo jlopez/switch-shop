@@ -6,6 +6,9 @@
 import { scanLibrary } from '@/lib/fileSystem';
 import DirList from '@/components/dir-list';
 
+// Always scan the library on request; never bake the listing into the build
+export const dynamic = 'force-dynamic';
+
 /**
  * Shop page component (server component)
  */
